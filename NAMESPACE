@@ -2,8 +2,8 @@
 
 export(SLTCA)
 export(lcphR)
-export(simulation)
 export(simulation.SLTCA)
+export(simulation.lcphR)
 import(Rcpp)
 import(RcppArmadillo)
 import(VGAM)

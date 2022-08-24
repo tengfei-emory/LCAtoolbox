@@ -16,13 +16,13 @@
 #' @param verbose Indicating whether output progress.
 #' @param stop.rule Stopping rule, either "PAR" for parameter L2 norm, or "tau" for posterior probability.
 #' @return Returns parameter estimation and variance estimation.
-#' @author Teng Fei. Email: tfei@emory.edu
-#' @references Fei et al (202x)
+#' @author Teng Fei. Email: feit1@mskcc.org
+#' @references Hart, K. R., Fei, T., & Hanfelt, J. J. (2021). Scalable and robust latent trajectory class analysis using artificial likelihood. Biometrics, 77(3), 1118-1128.
 #' @examples 
 #' 
 #' dat <- simulation.SLTCA(500)
 #' res <- SLTCA(dat,num_class=2,covx="baselinecov",vary=paste("y.",1:6,sep=''),
-#'              Y_dist=c('poi','poi','bin','bin','normal','normal'),verbose=TRUE,stop.rule="tau")
+#'              Y_dist=c('poi','poi','bin','bin','normal','normal'),varest=TRUE,verbose=TRUE,stop.rule="tau")
 #' 
 #' @useDynLib LCAtoolbox, .registration=TRUE
 #' @importFrom Rcpp sourceCpp
@@ -31,7 +31,7 @@
 #' @export
 
 SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterEM=500,
-                      initial='null',cor="ar1",init.tau=NULL,varest=FALSE,lbound=8,verbose=FALSE,
+                      initial='null',cor="ar1",init.tau=NULL,varest=FALSE,lbound=2,verbose=FALSE,
                       stop.rule="PAR",keep.switch=FALSE){
   
   start = proc.time()[3]
@@ -352,10 +352,8 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
   
   if (varest == TRUE){
     
-    ASE = varestcpp_ybspnew(zeta, dat$time, dat$time1, tevent,
-                            dat$delta, as.matrix(baseline[,covx]), xy, as.matrix(dat[,vary]), bsp,
-                            lambda_res$d, tau1, p, Y_dist, dat$newid, dat$last, mu, length(covgee)+2, as.matrix(baseline[,covgee]), phi, gamma,
-                            ipw$ipw, ipw$ipw_zeta, ipw$ipw_d)
+    ASE = varestcpp_sltca(dat$time, as.matrix(baseline[,covx]), as.matrix(dat[,vary]), 
+                          tau1, p, Y_dist, dat$newid, mu, length(covgee)+2, as.matrix(baseline[,covgee]), phi, gamma)
   }
   
   

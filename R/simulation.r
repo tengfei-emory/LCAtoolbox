@@ -1,15 +1,15 @@
-#' simulation: simulate a dataset for analysis
+#' simulation.lcphR: simulate a dataset for latent class survival analysis
 #' @description Simulate a dataset according to the scenario (I) in the manuscript.
 #' @param n sample size of the simulated dataset.
-#' @author Teng Fei. Email: tfei@emory.edu
-#' @references Fei, Hanfelt and Peng. Latent Class Analysis with Semi-parametric Proportional Hazards Submodel for Time-to-event Data (submitted).
+#' @author Teng Fei. Email: feit1@mskcc.org
+#' @references Fei, T., Hanfelt, J., & Peng, L. (2022). Latent Class Analysis with Semi-parametric Proportional Hazards Submodel for Time-to-event Data. arXiv preprint arXiv:2202.00775.
 #' @examples 
 #' 
-#' dat <- simulation(n=1000)
+#' dat <- simulation.lcphR(n=1000)
 #' 
 #' @export
 
-simulation <- function(n=1000){
+simulation.lcphR <- function(n=1000){
   
   time_base=time_base=c(0,0.5,1,1.5,2,2.5)
   X_dist=c('binom')

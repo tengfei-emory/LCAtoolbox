@@ -17,7 +17,7 @@ SLTCA(
   cor = "ar1",
   init.tau = NULL,
   varest = FALSE,
-  lbound = 8,
+  lbound = 2,
   verbose = FALSE,
   stop.rule = "PAR",
   keep.switch = FALSE
@@ -62,12 +62,12 @@ Scalable and Robust Latent Trajectory Class Analysis Using Artificial Likelihood
 
 dat <- simulation.SLTCA(500)
 res <- SLTCA(dat,num_class=2,covx="baselinecov",vary=paste("y.",1:6,sep=''),
-             Y_dist=c('poi','poi','bin','bin','normal','normal'),verbose=TRUE,stop.rule="tau")
+             Y_dist=c('poi','poi','bin','bin','normal','normal'),varest=TRUE,verbose=TRUE,stop.rule="tau")
 
 }
 \references{
-Fei et al (202x)
+Hart, K. R., Fei, T., & Hanfelt, J. J. (2021). Scalable and robust latent trajectory class analysis using artificial likelihood. Biometrics, 77(3), 1118-1128.
 }
 \author{
-Teng Fei. Email: tfei@emory.edu
+Teng Fei. Email: feit1@mskcc.org
 }

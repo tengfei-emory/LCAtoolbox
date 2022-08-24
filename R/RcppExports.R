@@ -37,3 +37,7 @@ varestcpp <- function(zeta, delta, chaz, tau, p, x, tevent) {
     .Call(`_LCAtoolbox_varestcpp`, zeta, delta, chaz, tau, p, x, tevent)
 }
 
+varestcpp_sltca <- function(t0, x, y, tau, p, Y_dist, id, mu, lbeta, covgee, phi, gamma) {
+    .Call(`_LCAtoolbox_varestcpp_sltca`, t0, x, y, tau, p, Y_dist, id, mu, lbeta, covgee, phi, gamma)
+}
+

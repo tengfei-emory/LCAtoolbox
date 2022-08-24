@@ -20,5 +20,5 @@ Simulate a dataset with longitudinal observations.
 dat <- simulation.SLTCA(500)
 }
 \author{
-Teng Fei. Email: tfei@emory.edu
+Teng Fei. Email: feit1@mskcc.org
 }

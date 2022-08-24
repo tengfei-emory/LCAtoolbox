@@ -59,7 +59,7 @@ Conduct latent class analysis with time-to-event data.
 \examples{
 
 set.seed(21227)
-dat <- simulation(n=1000)
+dat <- simulation.lcphR(n=1000)
 lcfit <- lcphR(dat,num_class=2,covx=c('Xcov1','Xcov2'),tolEM=1e-3,maxiterEM=100,varest=TRUE,traceplot=TRUE,initial='kmeans')
 
 }
