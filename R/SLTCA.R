@@ -31,8 +31,8 @@
 #' @export
 
 SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterEM=500,
-                      initial='null',cor="ar1",init.tau=NULL,varest=FALSE,lbound=2,verbose=FALSE,
-                      stop.rule="PAR",keep.switch=FALSE){
+                  initial='null',cor="ar1",init.tau=NULL,varest=FALSE,lbound=2,verbose=FALSE,
+                  stop.rule="PAR",keep.switch=FALSE){
   
   start = proc.time()[3]
   
@@ -44,7 +44,7 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
   num_feature <- length(Y_dist)
   
   dat <- dat[order(dat$id,dat$time),]
-
+  
   # if (is.null(covgee)){
   #   covgee = covx
   # }
@@ -65,7 +65,9 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
     dat$newid[i] = baseline$newid[baseline$id == dat$id[i]]
   }
   
-  x <- as.matrix(baseline[,covx])
+  if (!is.null(covx)){
+    x <- as.matrix(baseline[,covx])
+  }
   
   lab_class = rep(1,nrow(baseline)*num_class)
   for (i in 2:num_class){
@@ -131,7 +133,12 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
   
   ## EM algorithm
   
-  alpha = matrix(0,ncol=num_class-1,nrow=ncol(x)+1,byrow=T)
+  if (is.null(covx)){
+    alpha = matrix(0,ncol=num_class-1,nrow=1,byrow=T)
+  }else{
+    alpha = matrix(0,ncol=num_class-1,nrow=ncol(x)+1,byrow=T)
+  }
+  
   beta0 <- matrix(0,ncol=num_class,nrow=num_feature)
   beta1 <- matrix(0,ncol=num_class,nrow=num_feature)
   phi <- matrix(0,ncol=num_class,nrow=num_feature)
@@ -149,9 +156,13 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
     beta_0 = beta
     phi0 = phi
     gamma0 = gamma
-
-    vars <- paste(covx,collapse="+")
-    regression <- paste0("as.factor(class)", " ~ ", vars)
+    
+    if (!is.null(covx)){
+      vars <- paste(covx,collapse="+")
+      regression <- paste0("as.factor(class)", " ~ ", vars)
+    }else{
+      regression <- "as.factor(class) ~ 1"
+    }
     
     if (num_class > 1){
       lcfit <- vglm(as.formula(regression),family = multinomial(refLevel = 1),
@@ -160,7 +171,7 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
                                     class = lab_class, tau0 = as.vector(tau0)
                     ))
       alpha <- coef(lcfit)
-      alpha = matrix(alpha,ncol=num_class-1,nrow=ncol(x)+1,byrow=T)
+      alpha = matrix(alpha,ncol=ncol(alpha0),nrow=nrow(alpha0),byrow=T)
       p <- as.matrix(lcfit@fitted.values[1:n,])
     }else if (num_class==1){
       p <- as.matrix(rep(1,n),nrow=n,ncol=1)
@@ -335,7 +346,7 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
   end = proc.time()[3]
   timediff = end-start
   entropy = 1 + sum(tau1*log(tau1))/(n*log(num_class))
-
+  
   EQIC.long=0
   
   for (ii in 1:n){
@@ -356,6 +367,18 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
                           tau1, p, Y_dist, dat$newid, mu, length(covgee)+2, as.matrix(baseline[,covgee]), phi, gamma)
   }
   
+  rownames(beta0) <- rownames(beta1) <- rownames(phi) <- rownames(gamma) <- vary
+  if (is.null(covx)){
+    rownames(alpha) <- "Intercept"
+  }else{
+    rownames(alpha) <- c("Intercept",covx)
+  }
+  
+  colnames(beta0) <- colnames(beta1) <- colnames(phi) <- colnames(gamma) <- paste("Class",1:num_class)
+  colnames(alpha) <- paste("Class",2:num_class)
+  beta <- lapply(beta,function(x) {colnames(x) <- paste("Class",1:num_class);x})
+  beta <- lapply(beta,function(x) {rownames(x) <- vary;x})
+  names(beta) <- c("Intercept","Time",covgee)
   
   output <- list()
   output$num_class = num_class
