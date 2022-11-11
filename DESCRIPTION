@@ -9,4 +9,4 @@ Description: Work for survival data and longitudinal data
 License: GPL-3.0
 Imports: Rcpp (>= 1.0.9), RcppArmadillo, VGAM, geepack
 LinkingTo: Rcpp, RcppArmadillo
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1

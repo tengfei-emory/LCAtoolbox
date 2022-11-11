@@ -15,6 +15,7 @@ SLTCA(
   maxiterEM = 500,
   initial = "null",
   cor = "ar1",
+  ipw = 1,
   init.tau = NULL,
   varest = FALSE,
   lbound = 2,
@@ -41,6 +42,8 @@ SLTCA(
 \item{initial}{Initialization setting, either 'kmcov', 'null', 'random', 'true' or provided in 'init.tau'.}
 
 \item{cor}{Working correlation structure, currently only supporting "ar1".}
+
+\item{ipw}{A vector of inverse probability weight to account for informative censoring.}
 
 \item{init.tau}{Provided membership probability based on prior knowledge.}
 

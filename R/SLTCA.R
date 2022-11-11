@@ -10,6 +10,7 @@
 #' @param maxiterEM Number of maximum iterations of the EM algorithm.
 #' @param initial Initialization setting, either 'kmcov', 'null', 'random', 'true' or provided in 'init.tau'.
 #' @param cor Working correlation structure, currently only supporting "ar1".
+#' @param ipw A vector of inverse probability weight to account for informative censoring.
 #' @param init.tau Provided membership probability based on prior knowledge.
 #' @param varest Variance estimation indicator.
 #' @param lbound Constant bound of linear projection of approximated likelihood ratio.
@@ -31,7 +32,7 @@
 #' @export
 
 SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterEM=500,
-                  initial='null',cor="ar1",init.tau=NULL,varest=FALSE,lbound=2,verbose=FALSE,
+                  initial='null',cor="ar1",ipw=1,init.tau=NULL,varest=FALSE,lbound=2,verbose=FALSE,
                   stop.rule="PAR",keep.switch=FALSE){
   
   start = proc.time()[3]
@@ -216,11 +217,11 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
         
         # fit corresponding GEE model with weights tau and AR1 correlation structure
         if(Y_dist[j] == 'normal'){
-          geefit <- geepack::geeglm(as.formula(regression),family=gaussian,id=newid,waves=num_obs,weights=tau,data=dat,corstr=cor)#,scale.fix=T,scale.value = 1)
+          geefit <- geepack::geeglm(as.formula(regression),family=gaussian,id=newid,waves=num_obs,weights=tau/ipw,data=dat,corstr=cor)#,scale.fix=T,scale.value = 1)
         }else if (Y_dist[j] == 'poi'){
-          geefit <- geepack::geeglm(as.formula(regression),family=poisson,id=newid,waves=num_obs,weights=tau,data=dat,corstr=cor)#,scale.fix=T,scale.value = 1)
+          geefit <- geepack::geeglm(as.formula(regression),family=poisson,id=newid,waves=num_obs,weights=tau/ipw,data=dat,corstr=cor)#,scale.fix=T,scale.value = 1)
         }else if (Y_dist[j] == 'bin'){
-          geefit <- geepack::geeglm(as.formula(regression),family=binomial,id=newid,waves=num_obs,weights=tau,data=dat,corstr=cor)#,scale.fix=T,scale.value = 1)
+          geefit <- geepack::geeglm(as.formula(regression),family=binomial,id=newid,waves=num_obs,weights=tau/ipw,data=dat,corstr=cor)#,scale.fix=T,scale.value = 1)
         }
         
         gee.object[[c]][[j]] <- geefit
@@ -363,8 +364,14 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
   
   if (varest == TRUE){
     
-    ASE = varestcpp_sltca(dat$time, as.matrix(baseline[,covx]), as.matrix(dat[,vary]), 
-                          tau1, p, Y_dist, dat$newid, mu, length(covgee)+2, as.matrix(baseline[,covgee]), phi, gamma)
+    if (is.null(covx)){
+      ASE = varestcpp_sltca_prob(dat$time, as.matrix(dat[,vary]), 
+                                 tau1, p, Y_dist, dat$newid, mu, length(covgee)+2, as.matrix(baseline[,covgee]), phi, gamma)
+    }else{
+      ASE = varestcpp_sltca(dat$time, as.matrix(baseline[,covx]), as.matrix(dat[,vary]), 
+                            tau1, p, Y_dist, dat$newid, mu, length(covgee)+2, as.matrix(baseline[,covgee]), phi, gamma)
+    }
+    
   }
   
   rownames(beta0) <- rownames(beta1) <- rownames(phi) <- rownames(gamma) <- vary
@@ -379,6 +386,20 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
   beta <- lapply(beta,function(x) {colnames(x) <- paste("Class",1:num_class);x})
   beta <- lapply(beta,function(x) {rownames(x) <- vary;x})
   names(beta) <- c("Intercept","Time",covgee)
+  
+  ASE$alpharb
+  rownames(ASE$betarb) <- rownames(ASE$betai) <- paste(rep(paste("Class",1:num_class),each=length(vary)*(2+length(covgee))),
+                                                       rep(vary,num_class*(2+length(covgee))),
+                                                       rep(rep(c("Intercept","Time",covgee),each=length(vary)),num_class)
+  )
+  
+  if (is.null(covx)){
+    rownames(ASE$alpharb) <- rownames(ASE$alphai) <- paste("Class",2:num_class)
+  }else{
+    rownames(ASE$alpharb) <- rownames(ASE$alphai) <- paste(rep(paste("Class",2:num_class),each=length(covx)+1),
+                                                           rep(c("Intercept",covx),num_class-1)
+    )
+  }
   
   output <- list()
   output$num_class = num_class
