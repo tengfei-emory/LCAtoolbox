@@ -22,7 +22,7 @@
 #' @examples 
 #' 
 #' dat <- simulation.SLTCA(500)
-#' res <- SLTCA(dat,num_class=2,covx="baselinecov",vary=paste("y.",1:6,sep=''),
+#' res <- SLTCA(dat,num_class=2,covx="baselinecov",vary=paste("y.",1:6,sep=''),covgee="time",
 #'              Y_dist=c('poi','poi','bin','bin','normal','normal'),varest=TRUE,verbose=TRUE,stop.rule="tau")
 #' 
 #' @useDynLib LCAtoolbox, .registration=TRUE
@@ -31,7 +31,7 @@
 #' @import geepack
 #' @export
 
-SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterEM=500,
+SLTCA <- function(dat,num_class,covx,vary,covgee,Y_dist,tolEM=1e-3,maxiterEM=500,
                   initial='null',cor="ar1",ipw=1,init.tau=NULL,varest=FALSE,lbound=2,verbose=FALSE,
                   stop.rule="PAR",keep.switch=FALSE){
   
@@ -145,7 +145,7 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
   phi <- matrix(0,ncol=num_class,nrow=num_feature)
   gamma <- matrix(0,ncol=num_class,nrow=num_feature)
   beta = list()
-  for (i in 1:(length(covgee)+2)){
+  for (i in 1:(length(covgee)+1)){
     beta[[i]] <- matrix(0,ncol=num_class,nrow=num_feature)
   }
   
@@ -194,12 +194,14 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
     gee.object <- list()
     
     if (vars != ""){
-      regression <- paste0("yy", " ~ time +", vars)
+      regression <- paste0("yy", " ~ ", vars)
     }else{
       regression <- "yy ~ time"
     }
     
     for (c in 1:num_class){
+      
+      # print(c)
       
       tau = rep(0,nrow(dat))
       
@@ -211,6 +213,9 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
       gee.object[[c]] <- list()
       
       for (j in 1:num_feature){
+        
+        # print(j)
+        # print("flag1")
         
         # yy is the jth longitudinal marker
         yy <- as.numeric(dat[,vary[j]])
@@ -224,13 +229,15 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
           geefit <- geepack::geeglm(as.formula(regression),family=binomial,id=newid,waves=num_obs,weights=tau/ipw,data=dat,corstr=cor)#,scale.fix=T,scale.value = 1)
         }
         
+        # print("flag2")
+        
         gee.object[[c]][[j]] <- geefit
         mu[,j,c] = geefit$fitted.values
         v[,j,c] = geefit$family$variance(geefit$fitted.values)
         
         # obtain point estimates
         
-        for (ii in 1:(length(covgee)+2)){
+        for (ii in 1:(length(covgee)+1)){
           beta[[ii]][j,c] <- coef(geefit)[ii]
         }
         
@@ -244,8 +251,11 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
           gamma[j,c] <- geefit$geese$alpha
         }
         
+        # print("flag3")
+        
         # use ic function to obtain eqic
         longlik[,c] = longlik[,c] + ic(geefit,Y_dist[j],yy)
+        
         # print(c)
         # print(Y_dist[j])
         # print(summary(ic(geefit,Y_dist[j],yy)))
@@ -259,11 +269,12 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
     
     y <- as.matrix(dat[,vary])
     
-    if (cor=="ar1"){
-      ew <- LinProjCpp(mu,v,t(gamma),t(phi),dat$newid,dat$num_obs,dat$time,y)
-    }else if (cor=="ind"){
-      ew <- LinProjNew(mu,v,gamma,phi,Y_dist,dat,y)
-    }
+    ew <- LinProjCpp(mu,v,t(gamma),t(phi),dat$newid,dat$num_obs,dat$time,y,cor)
+    
+    # if (cor=="ar1"){
+    # }else if (cor=="ind"){
+    #   ew <- LinProjNew(mu,v,gamma,phi,Y_dist,dat,y)
+    # }
     
     # restrict the upper and lower bound of ew
     ew[ew>10^lbound] = 10^(lbound)
@@ -285,6 +296,7 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
             tau01[idx,] <- tau1[idx,]
           }
         }
+        rownames(tau01) = rownames(tau1)
       }else{
         tau01 = tau1
       }
@@ -313,6 +325,7 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
     
     if (verbose){
       cat(paste('Convergence criteria: ',round(diffEM,5),' ', round(diffPAR,5),'\n',sep=''))
+      plot(tau0[,1])
     }
     
     if (num_class == 1){
@@ -340,6 +353,7 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
         } 
       }
     }
+    
   }
   
   count=i
@@ -366,10 +380,24 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
     
     if (is.null(covx)){
       ASE = varestcpp_sltca_prob(dat$time, as.matrix(dat[,vary]), 
-                                 tau1, p, Y_dist, dat$newid, mu, length(covgee)+2, as.matrix(baseline[,covgee]), phi, gamma)
+                                 tau1, p, Y_dist, dat$newid, mu, length(covgee)+1, as.matrix(baseline[,covgee]), phi, gamma, cor)
     }else{
       ASE = varestcpp_sltca(dat$time, as.matrix(baseline[,covx]), as.matrix(dat[,vary]), 
-                            tau1, p, Y_dist, dat$newid, mu, length(covgee)+2, as.matrix(baseline[,covgee]), phi, gamma)
+                            tau1, p, Y_dist, dat$newid, mu, length(covgee)+1, as.matrix(baseline[,covgee]), phi, gamma, cor)
+    }
+    
+    # ASE$alpharb
+    rownames(ASE$betarb) <- rownames(ASE$betai) <- paste(rep(paste("Class",1:num_class),each=length(vary)*(1+length(covgee))),
+                                                         rep(vary,num_class*(1+length(covgee))),
+                                                         rep(rep(c("Intercept",covgee),each=length(vary)),num_class)
+    )
+    
+    if (is.null(covx)){
+      rownames(ASE$alpharb) <- rownames(ASE$alphai) <- paste("Class",2:num_class)
+    }else{
+      rownames(ASE$alpharb) <- rownames(ASE$alphai) <- paste(rep(paste("Class",2:num_class),each=length(covx)+1),
+                                                             rep(c("Intercept",covx),num_class-1)
+      )
     }
     
   }
@@ -385,21 +413,7 @@ SLTCA <- function(dat,num_class,covx,vary,covgee=NULL,Y_dist,tolEM=1e-3,maxiterE
   colnames(alpha) <- paste("Class",2:num_class)
   beta <- lapply(beta,function(x) {colnames(x) <- paste("Class",1:num_class);x})
   beta <- lapply(beta,function(x) {rownames(x) <- vary;x})
-  names(beta) <- c("Intercept","Time",covgee)
-  
-  ASE$alpharb
-  rownames(ASE$betarb) <- rownames(ASE$betai) <- paste(rep(paste("Class",1:num_class),each=length(vary)*(2+length(covgee))),
-                                                       rep(vary,num_class*(2+length(covgee))),
-                                                       rep(rep(c("Intercept","Time",covgee),each=length(vary)),num_class)
-  )
-  
-  if (is.null(covx)){
-    rownames(ASE$alpharb) <- rownames(ASE$alphai) <- paste("Class",2:num_class)
-  }else{
-    rownames(ASE$alpharb) <- rownames(ASE$alphai) <- paste(rep(paste("Class",2:num_class),each=length(covx)+1),
-                                                           rep(c("Intercept",covx),num_class-1)
-    )
-  }
+  names(beta) <- c("Intercept",covgee)
   
   output <- list()
   output$num_class = num_class

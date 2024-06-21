@@ -9,7 +9,7 @@ SLTCA(
   num_class,
   covx,
   vary,
-  covgee = NULL,
+  covgee,
   Y_dist,
   tolEM = 0.001,
   maxiterEM = 500,
@@ -64,7 +64,7 @@ Scalable and Robust Latent Trajectory Class Analysis Using Artificial Likelihood
 \examples{
 
 dat <- simulation.SLTCA(500)
-res <- SLTCA(dat,num_class=2,covx="baselinecov",vary=paste("y.",1:6,sep=''),
+res <- SLTCA(dat,num_class=2,covx="baselinecov",vary=paste("y.",1:6,sep=''),covgee="time",
              Y_dist=c('poi','poi','bin','bin','normal','normal'),varest=TRUE,verbose=TRUE,stop.rule="tau")
 
 }

@@ -9,8 +9,8 @@ EMNewton <- function(maxiterEM, tolEM, maxiterNewton, tolNewton, alpha, zeta, x,
     .Call(`_LCAtoolbox_EMNewton`, maxiterEM, tolEM, maxiterNewton, tolNewton, alpha, zeta, x, delta, t, tevent, num_class, d, tau, lambda_EM, loglik_EM, postweight, printplot)
 }
 
-LinProjCpp <- function(mu, v, gamma, phi, id, obs, time, y) {
-    .Call(`_LCAtoolbox_LinProjCpp`, mu, v, gamma, phi, id, obs, time, y)
+LinProjCpp <- function(mu, v, gamma, phi, id, obs, time, y, cor) {
+    .Call(`_LCAtoolbox_LinProjCpp`, mu, v, gamma, phi, id, obs, time, y, cor)
 }
 
 newton <- function(maxiterNewton, tolNewton, alpha, zeta, x, delta, t, tevent, num_class, tau, lambda_EM, loglik_EM) {
@@ -37,7 +37,11 @@ varestcpp <- function(zeta, delta, chaz, tau, p, x, tevent) {
     .Call(`_LCAtoolbox_varestcpp`, zeta, delta, chaz, tau, p, x, tevent)
 }
 
-varestcpp_sltca <- function(t0, x, y, tau, p, Y_dist, id, mu, lbeta, covgee, phi, gamma) {
-    .Call(`_LCAtoolbox_varestcpp_sltca`, t0, x, y, tau, p, Y_dist, id, mu, lbeta, covgee, phi, gamma)
+varestcpp_sltca <- function(t0, x, y, tau, p, Y_dist, id, mu, lbeta, covgee, phi, gamma, cor) {
+    .Call(`_LCAtoolbox_varestcpp_sltca`, t0, x, y, tau, p, Y_dist, id, mu, lbeta, covgee, phi, gamma, cor)
+}
+
+varestcpp_sltca_prob <- function(t0, y, tau, p, Y_dist, id, mu, lbeta, covgee, phi, gamma, cor) {
+    .Call(`_LCAtoolbox_varestcpp_sltca_prob`, t0, y, tau, p, Y_dist, id, mu, lbeta, covgee, phi, gamma, cor)
 }
 
