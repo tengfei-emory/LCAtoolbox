@@ -25,15 +25,20 @@ SLTCA(
 )
 }
 \arguments{
-\item{dat}{Input data.}
+\item{dat}{Input data in long format (one row per subject-visit), with columns id, time,
+num_obs (visit/wave index), the longitudinal outcomes and covariates. Outcomes may be
+missing (NA) at any subset of visits: each outcome enters the model through the visits
+at which it is observed, by conditional independence of the outcomes given the class.}
 
 \item{num_class}{Number of latent classes.}
 
 \item{covx}{Names of baseline covariates.}
 
-\item{vary}{Names longitudinal outcomes.}
+\item{vary}{Names of longitudinal outcomes.}
 
 \item{covgee}{Names of covariates in GEE models.}
+
+\item{Y_dist}{Distributions of longitudinal outcomes, a vector with elements 'normal', 'bin' or 'poi'.}
 
 \item{tolEM}{Stopping criteria for the EM algorithm.}
 
@@ -41,7 +46,7 @@ SLTCA(
 
 \item{initial}{Initialization setting, either 'kmcov', 'null', 'random', 'true' or provided in 'init.tau'.}
 
-\item{cor}{Working correlation structure, currently only supporting "ar1".}
+\item{cor}{Working correlation structure: "ind" (independence), "ar1" or "exch" (exchangeable).}
 
 \item{ipw}{A vector of inverse probability weight to account for informative censoring.}
 
@@ -54,6 +59,8 @@ SLTCA(
 \item{verbose}{Indicating whether output progress.}
 
 \item{stop.rule}{Stopping rule, either "PAR" for parameter L2 norm, or "tau" for posterior probability.}
+
+\item{keep.switch}{Whether subjects with near-degenerate membership keep their class between iterations.}
 }
 \value{
 Returns parameter estimation and variance estimation.

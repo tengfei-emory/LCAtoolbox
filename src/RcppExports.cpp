@@ -199,8 +199,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // varestcpp_sltca
-Rcpp::List varestcpp_sltca(arma::vec t0, arma::mat x, arma::mat y, arma::mat tau, arma::mat p, Rcpp::StringVector Y_dist, arma::vec id, arma::cube mu, double lbeta, arma::mat covgee, arma::mat phi, arma::mat gamma, std::string cor);
-RcppExport SEXP _LCAtoolbox_varestcpp_sltca(SEXP t0SEXP, SEXP xSEXP, SEXP ySEXP, SEXP tauSEXP, SEXP pSEXP, SEXP Y_distSEXP, SEXP idSEXP, SEXP muSEXP, SEXP lbetaSEXP, SEXP covgeeSEXP, SEXP phiSEXP, SEXP gammaSEXP, SEXP corSEXP) {
+Rcpp::List varestcpp_sltca(arma::vec t0, arma::mat x, arma::mat y, arma::mat tau, arma::mat p, Rcpp::StringVector Y_dist, arma::vec id, arma::vec obs, arma::cube mu, double lbeta, arma::mat covgee, arma::mat phi, arma::mat gamma, std::string cor);
+RcppExport SEXP _LCAtoolbox_varestcpp_sltca(SEXP t0SEXP, SEXP xSEXP, SEXP ySEXP, SEXP tauSEXP, SEXP pSEXP, SEXP Y_distSEXP, SEXP idSEXP, SEXP obsSEXP, SEXP muSEXP, SEXP lbetaSEXP, SEXP covgeeSEXP, SEXP phiSEXP, SEXP gammaSEXP, SEXP corSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -211,19 +211,20 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type p(pSEXP);
     Rcpp::traits::input_parameter< Rcpp::StringVector >::type Y_dist(Y_distSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type id(idSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type obs(obsSEXP);
     Rcpp::traits::input_parameter< arma::cube >::type mu(muSEXP);
     Rcpp::traits::input_parameter< double >::type lbeta(lbetaSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type covgee(covgeeSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type phi(phiSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type gamma(gammaSEXP);
     Rcpp::traits::input_parameter< std::string >::type cor(corSEXP);
-    rcpp_result_gen = Rcpp::wrap(varestcpp_sltca(t0, x, y, tau, p, Y_dist, id, mu, lbeta, covgee, phi, gamma, cor));
+    rcpp_result_gen = Rcpp::wrap(varestcpp_sltca(t0, x, y, tau, p, Y_dist, id, obs, mu, lbeta, covgee, phi, gamma, cor));
     return rcpp_result_gen;
 END_RCPP
 }
 // varestcpp_sltca_prob
-Rcpp::List varestcpp_sltca_prob(arma::vec t0, arma::mat y, arma::mat tau, arma::mat p, Rcpp::StringVector Y_dist, arma::vec id, arma::cube mu, double lbeta, arma::mat covgee, arma::mat phi, arma::mat gamma, std::string cor);
-RcppExport SEXP _LCAtoolbox_varestcpp_sltca_prob(SEXP t0SEXP, SEXP ySEXP, SEXP tauSEXP, SEXP pSEXP, SEXP Y_distSEXP, SEXP idSEXP, SEXP muSEXP, SEXP lbetaSEXP, SEXP covgeeSEXP, SEXP phiSEXP, SEXP gammaSEXP, SEXP corSEXP) {
+Rcpp::List varestcpp_sltca_prob(arma::vec t0, arma::mat y, arma::mat tau, arma::mat p, Rcpp::StringVector Y_dist, arma::vec id, arma::vec obs, arma::cube mu, double lbeta, arma::mat covgee, arma::mat phi, arma::mat gamma, std::string cor);
+RcppExport SEXP _LCAtoolbox_varestcpp_sltca_prob(SEXP t0SEXP, SEXP ySEXP, SEXP tauSEXP, SEXP pSEXP, SEXP Y_distSEXP, SEXP idSEXP, SEXP obsSEXP, SEXP muSEXP, SEXP lbetaSEXP, SEXP covgeeSEXP, SEXP phiSEXP, SEXP gammaSEXP, SEXP corSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -233,13 +234,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type p(pSEXP);
     Rcpp::traits::input_parameter< Rcpp::StringVector >::type Y_dist(Y_distSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type id(idSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type obs(obsSEXP);
     Rcpp::traits::input_parameter< arma::cube >::type mu(muSEXP);
     Rcpp::traits::input_parameter< double >::type lbeta(lbetaSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type covgee(covgeeSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type phi(phiSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type gamma(gammaSEXP);
     Rcpp::traits::input_parameter< std::string >::type cor(corSEXP);
-    rcpp_result_gen = Rcpp::wrap(varestcpp_sltca_prob(t0, y, tau, p, Y_dist, id, mu, lbeta, covgee, phi, gamma, cor));
+    rcpp_result_gen = Rcpp::wrap(varestcpp_sltca_prob(t0, y, tau, p, Y_dist, id, obs, mu, lbeta, covgee, phi, gamma, cor));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -254,8 +256,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_LCAtoolbox_numericInfo", (DL_FUNC) &_LCAtoolbox_numericInfo, 13},
     {"_LCAtoolbox_postweight", (DL_FUNC) &_LCAtoolbox_postweight, 8},
     {"_LCAtoolbox_varestcpp", (DL_FUNC) &_LCAtoolbox_varestcpp, 7},
-    {"_LCAtoolbox_varestcpp_sltca", (DL_FUNC) &_LCAtoolbox_varestcpp_sltca, 13},
-    {"_LCAtoolbox_varestcpp_sltca_prob", (DL_FUNC) &_LCAtoolbox_varestcpp_sltca_prob, 12},
+    {"_LCAtoolbox_varestcpp_sltca", (DL_FUNC) &_LCAtoolbox_varestcpp_sltca, 14},
+    {"_LCAtoolbox_varestcpp_sltca_prob", (DL_FUNC) &_LCAtoolbox_varestcpp_sltca_prob, 13},
     {NULL, NULL, 0}
 };
 
