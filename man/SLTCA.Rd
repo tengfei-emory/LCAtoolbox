@@ -25,15 +25,20 @@ SLTCA(
 )
 }
 \arguments{
-\item{dat}{Input data.}
+\item{dat}{Input data in long format (one row per subject-visit), with columns id, time,
+num_obs (visit/wave index), the longitudinal outcomes and covariates. Outcomes may be
+missing (NA) at any subset of visits: each outcome enters the model through the visits
+at which it is observed, by conditional independence of the outcomes given the class.}
 
 \item{num_class}{Number of latent classes.}
 
 \item{covx}{Names of baseline covariates.}
 
-\item{vary}{Names longitudinal outcomes.}
+\item{vary}{Names of longitudinal outcomes.}
 
 \item{covgee}{Names of covariates in GEE models.}
+
+\item{Y_dist}{Distributions of longitudinal outcomes, a vector with elements 'normal', 'bin' or 'poi'.}
 
 \item{tolEM}{Stopping criteria for the EM algorithm.}
 
@@ -41,7 +46,7 @@ SLTCA(
 
 \item{initial}{Initialization setting, either 'kmcov', 'null', 'random', 'true' or provided in 'init.tau'.}
 
-\item{cor}{Working correlation structure, currently only supporting "ar1".}
+\item{cor}{Working correlation structure: "ind" (independence), "ar1" or "exch" (exchangeable).}
 
 \item{ipw}{A vector of inverse probability weight to account for informative censoring.}
 
@@ -54,6 +59,8 @@ SLTCA(
 \item{verbose}{Indicating whether output progress.}
 
 \item{stop.rule}{Stopping rule, either "PAR" for parameter L2 norm, or "tau" for posterior probability.}
+
+\item{keep.switch}{Whether subjects with near-degenerate membership keep their class between iterations.}
 }
 \value{
 Returns parameter estimation and variance estimation.
@@ -64,8 +71,22 @@ Scalable and Robust Latent Trajectory Class Analysis Using Artificial Likelihood
 \examples{
 
 dat <- simulation.SLTCA(500)
+
+# AR-1 working correlation (default)
 res <- SLTCA(dat,num_class=2,covx="baselinecov",vary=paste("y.",1:6,sep=''),covgee="time",
              Y_dist=c('poi','poi','bin','bin','normal','normal'),varest=TRUE,verbose=TRUE,stop.rule="tau")
+
+# exchangeable working correlation
+res.exch <- SLTCA(dat,num_class=2,covx="baselinecov",vary=paste("y.",1:6,sep=''),covgee="time",
+                  Y_dist=c('poi','poi','bin','bin','normal','normal'),cor="exch",stop.rule="tau")
+
+# outcomes need not be observed at all visits: each outcome contributes
+# through the visits at which it is observed
+datm <- dat
+datm$y.1[runif(nrow(datm)) < 0.3] <- NA          # missing at random visits
+datm$y.3[datm$num_obs \%\% 2 == 0] <- NA           # observed at odd waves only
+res.m <- SLTCA(datm,num_class=2,covx="baselinecov",vary=paste("y.",1:6,sep=''),covgee="time",
+               Y_dist=c('poi','poi','bin','bin','normal','normal'),varest=TRUE,stop.rule="tau")
 
 }
 \references{
