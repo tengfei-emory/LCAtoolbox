@@ -341,6 +341,7 @@ SLTCA <- function(dat,num_class,covx,vary,covgee,Y_dist,tolEM=1e-3,maxiterEM=500
   output$numiter = count
   output$timediff = timediff
   output$cor = cor
+  output$lbound = lbound
   if (varest == T){
     output$ASE = ASE
   }
