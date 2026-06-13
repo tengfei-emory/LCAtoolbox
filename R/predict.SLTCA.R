@@ -20,7 +20,13 @@
 #' dat <- simulation.SLTCA(500)
 #' res <- SLTCA(dat,num_class=2,covx="baselinecov",vary=paste("y.",1:6,sep=''),covgee="time",
 #'              Y_dist=c('poi','poi','bin','bin','normal','normal'),varest=TRUE,verbose=TRUE,stop.rule="tau")
-#' pred <- predict(res,newdata=dat,target.time=1)
+#' # posterior membership using all observations
+#' pred <- predict(res,newdata=dat)
+#'
+#' # early prediction using only observations up to time 1
+#' pred1 <- predict(res,newdata=dat,target.time=1)
+#' head(pred1$tau)
+#' table(pred1$modal)
 #'
 #' @method predict SLTCA
 #' @export

@@ -71,8 +71,22 @@ Scalable and Robust Latent Trajectory Class Analysis Using Artificial Likelihood
 \examples{
 
 dat <- simulation.SLTCA(500)
+
+# AR-1 working correlation (default)
 res <- SLTCA(dat,num_class=2,covx="baselinecov",vary=paste("y.",1:6,sep=''),covgee="time",
              Y_dist=c('poi','poi','bin','bin','normal','normal'),varest=TRUE,verbose=TRUE,stop.rule="tau")
+
+# exchangeable working correlation
+res.exch <- SLTCA(dat,num_class=2,covx="baselinecov",vary=paste("y.",1:6,sep=''),covgee="time",
+                  Y_dist=c('poi','poi','bin','bin','normal','normal'),cor="exch",stop.rule="tau")
+
+# outcomes need not be observed at all visits: each outcome contributes
+# through the visits at which it is observed
+datm <- dat
+datm$y.1[runif(nrow(datm)) < 0.3] <- NA          # missing at random visits
+datm$y.3[datm$num_obs \%\% 2 == 0] <- NA           # observed at odd waves only
+res.m <- SLTCA(datm,num_class=2,covx="baselinecov",vary=paste("y.",1:6,sep=''),covgee="time",
+               Y_dist=c('poi','poi','bin','bin','normal','normal'),varest=TRUE,stop.rule="tau")
 
 }
 \references{
